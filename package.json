@@ -1,6 +1,7 @@
 {
   "name": "blog-assistant",
   "version": "1.0.0",
+  "type": "module",
   "scripts": {
     "build": "node scripts/build-index.js",
     "start": "node server.js"
@@ -12,4 +13,3 @@
     "marked": "^7.0.2"
   }
 }
-
