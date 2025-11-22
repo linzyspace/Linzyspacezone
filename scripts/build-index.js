@@ -23,8 +23,7 @@ async function build() {
   }
 
   await fs.writeFile("public/search-index.json", JSON.stringify(posts, null, 2));
-  console.log("search-index.json created ✔");
+  console.log("✔ search-index.json generated");
 }
 
 build();
-
