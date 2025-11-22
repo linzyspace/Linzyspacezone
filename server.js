@@ -9,6 +9,12 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Serve public folder
+app.use((req, res, next) => {
+  res.setHeader("X-Frame-Options", "ALLOWALL");
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  next();
+});
+
 app.use(express.static(path.join(__dirname, "public")));
 
 // Fallback to index.html
