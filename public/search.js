@@ -1,35 +1,46 @@
-<script>
-let fuse;
+async function loadIndex() {
+  const res = await fetch("/search-index.json");
+  return await res.json();
+}
 
-fetch("/search-index.json")
-  .then(r => r.json())
-  .then(posts => {
-    fuse = new Fuse(posts, { keys: ["title", "content", "tags"], threshold: 0.3 });
-  });
+function getQueryParam(name) {
+  const url = new URL(window.location.href);
+  return url.searchParams.get(name);
+}
 
-document.getElementById("q").addEventListener("keydown", (e) => {
-  if (e.key === "Enter") search(e.target.value);
-});
+function searchPosts(query, index) {
+  query = query.toLowerCase();
+  let results = [];
 
-function search(q) {
-  const chat = document.getElementById("chat");
-  chat.innerHTML = `<b>You:</b> ${q}<br><br>`;
-
-  const results = fuse.search(q).slice(0, 5);
-
-  if (!results.length) {
-    chat.innerHTML += "No matches found.";
-    return;
+  for (const post of index) {
+    if (
+      post.title.toLowerCase().includes(query) ||
+      post.content.toLowerCase().includes(query)
+    ) {
+      results.push(post);
+    }
   }
 
-  results.forEach(r => {
-    chat.innerHTML += `
-      <div class="result">
-        <a href="${r.item.url}"><b>${r.item.title}</b></a>
-        <div class="snippet">${r.item.content.substring(0, 200)}…</div>
-      </div>
-    `;
-  });
+  return results;
 }
-</script>
 
+window.onload = async () => {
+  const index = await loadIndex();
+  const output = document.getElementById("output");
+  const box = document.getElementById("searchBox");
+  const go = document.getElementById("goBtn");
+
+  // auto-run query if ?ask=something is passed
+  const autoQuery = getQueryParam("ask");
+  if (autoQuery) {
+    box.value = autoQuery;
+    const results = searchPosts(autoQuery, index);
+    output.innerHTML = JSON.stringify(results, null, 2);
+  }
+
+  go.onclick = () => {
+    const q = box.value.trim();
+    const results = searchPosts(q, index);
+    output.innerHTML = JSON.stringify(results, null, 2);
+  };
+};
