@@ -2,157 +2,19 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>LinzySpace Blog Assistant</title>
-<style>
-  body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
-
-  /* Assistant container */
-  #assistantContainer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background: #f9f9f9;
-    border-top: 2px solid #ddd;
-    padding: 10px;
-    display: flex;
-    gap: 10px;
-    z-index: 9999;
-    box-shadow: 0 -2px 6px rgba(0,0,0,0.1);
-  }
-
-  #assistantInput {
-    flex: 1;
-    padding: 12px;
-    font-size: 15px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-  }
-
-  #assistantSend {
-    padding: 12px 18px;
-    background: #007bff;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-  }
-
-  /* Results box */
-  #assistantResults {
-    position: fixed;
-    bottom: 60px;
-    left: 10px;
-    right: 10px;
-    max-height: 300px;
-    overflow-y: auto;
-    background: white;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    padding: 10px;
-    z-index: 9999;
-    display: none;
-  }
-
-  .assistantPost {
-    margin-bottom: 10px;
-    padding-bottom: 6px;
-    border-bottom: 1px solid #eee;
-  }
-
-  .assistantPost a {
-    font-weight: bold;
-    text-decoration: none;
-    color: #007bff;
-  }
-</style>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blog Assistant</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<!-- Assistant HTML -->
-<div id="assistantContainer">
-  <input id="assistantInput" type="text" placeholder="Ask a question about the blog…" />
-  <button id="assistantSend">Search</button>
-</div>
 <div id="assistantResults"></div>
 
-<script>
-(async function(){
-  const inputBox = document.getElementById('assistantInput');
-  const sendBtn = document.getElementById('assistantSend');
-  const resultsBox = document.getElementById('assistantResults');
+<div id="assistantContainer">
+  <input id="assistantInput" type="text" placeholder="Type your message…" />
+  <button id="assistantSend">Send</button>
+</div>
 
-  // Update this URL to your actual JSON file
-  const indexUrl = "https://YOURUSERNAME.github.io/YOURREPO/search-index.json";
-  let posts = [];
-  try {
-    const res = await fetch(indexUrl);
-    posts = await res.json();
-    console.log('Loaded posts:', posts);
-  } catch(e) {
-    resultsBox.style.display = 'block';
-    resultsBox.innerHTML = 'Failed to load blog posts. Check CORS settings or URL.';
-    return;
-  }
-
-  // Get fields safely
-  function getFields(post) {
-    const title = post.title || '';
-    const content = post.content || '';
-    const tags = Array.isArray(post.tags) ? post.tags : [];
-    const url = post.url || '#';
-    return { title, content, tags, url };
-  }
-
-  function searchPosts(query) {
-    query = query.toLowerCase();
-    return posts.filter(post => {
-      const { title, content, tags } = getFields(post);
-      const inTitle = title.toLowerCase().includes(query);
-      const inContent = content.toLowerCase().includes(query);
-      const inTags = tags.some(tag => tag.toLowerCase().includes(query));
-      return inTitle || inContent || inTags;
-    });
-  }
-
-  function renderResults(results) {
-    if (!results.length) {
-      resultsBox.innerHTML = 'No matching posts found.';
-      resultsBox.style.display = 'block';
-      return;
-    }
-
-    resultsBox.innerHTML = '';
-    results.forEach(post => {
-      const { title, content, url } = getFields(post);
-      const div = document.createElement('div');
-      div.className = 'assistantPost';
-      div.innerHTML = `
-        <a href="${url}" target="_blank">${title}</a>
-        ${content ? `<div>${content.substring(0,200)}…</div>` : ''}
-      `;
-      resultsBox.appendChild(div);
-    });
-    resultsBox.style.display = 'block';
-  }
-
-  function handleSearch() {
-    const q = inputBox.value.trim();
-    if (!q) return;
-    const results = searchPosts(q);
-    renderResults(results);
-    inputBox.value = ''; // Clear input after search
-  }
-
-  sendBtn.addEventListener('click', handleSearch);
-  inputBox.addEventListener('keydown', function(e){
-    if(e.key === 'Enter') {
-      e.preventDefault();
-      handleSearch();
-    }
-  });
-})();
-</script>
-
+<script src="script.js"></script>
 </body>
 </html>
